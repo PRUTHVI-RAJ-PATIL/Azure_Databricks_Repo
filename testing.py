@@ -123,3 +123,26 @@ df.select('employee_name','department').where(col('state').isin(states)).show()
 from pyspark.sql.functions import col
 
 display(df.orderBy(col('salary').desc()).tail(5))
+
+# COMMAND ----------
+
+from pyspark.sql.functions import *
+from pyspark.sql.window import Window
+
+windowSpec = Window.partitionBy("department").orderBy(col("salary").desc())
+df_with_rank = df.withColumn("rank", row_number().over(windowSpec))
+highest_salary_df = df_with_rank.filter(col("rank") == 1).select(col("employee_name"), col("department"), col("salary"))
+
+display(highest_salary_df)
+
+# COMMAND ----------
+
+df.select((max("salary"))).show()
+
+# COMMAND ----------
+
+df.select('employee_name','salary','department').sort('salary', ascending=False).show(5)
+
+# COMMAND ----------
+
+df.select('department','salary','employee_name').distinct().sort('salary', ascending=False).show()
